@@ -1,0 +1,14 @@
+name: flowsense
+version: '1.0'
+main: id.sattr.flowsense
+api-version: '1.18'
+author: sattr
+description: all-in-one donation gateway to monetize your minecraft server in ease
+website: https://flowsense.noclick.cc
+commands:
+  flowsense:
+    usage: /<command> reload
+    permission: flowsense.reload
+permissions:
+  flowsense.reload:
+    default: op

@@ -1,0 +1,80 @@
+# Plugin by Airree_
+
+# very special private secret token that you should keep by yourself
+# this token is used to establish connection between your plugin and our server
+token: ""
+
+# endpoint-url is basically an address to tell Donation Services where they should send the donation notification to.
+# this field is optional IF you host your server in a public network.
+# however if you host your server on local network, make sure to forward this plugin's port using ngrok or other services
+# and fill this filed with the forwarded url
+endpoint-url: ""
+
+# port number for the plugin to run
+# make sure it's not already used by another app
+# type: integer
+# default: 49155
+port: 49155
+
+
+# log "Donation Recieved!" in console when a webhook comes in
+# you dont necessarily need this to be true
+# type: boolean
+# default: false
+log-donation: false
+
+# your saweria widget url (from the overlay page in your dashboard)
+# includes your streamKey, used to verify real donations
+# don't mess this up
+# example:
+# widget-url: "https://saweria.co/widgets/alert?streamKey=your_stream_key_here"
+# type: string
+# default: ""
+widget-url: ""
+
+# show donation messages in-game when someone donates
+# set to false if you want to keep it quiet
+# type: boolean
+# default: true
+broadcast-message: true
+
+# format for the in-game donation message
+# minimessage support
+# you can use these placeholders:
+#  - {version}
+#  - {created_at}
+#  - {id}
+#  - {type}
+#  - {amount_raw}
+#  - {amount_formatted}
+#  - {cut}
+#  - {cut_formatted}
+#  - {donator_name}
+#  - {donator_email}
+#  - {donator_is_user}
+#  - {message}
+
+# type: string
+# default: "&d[Donation] &e{donator_name} &fdonating &aRp{amount_formatted} &7>> &f{message}"
+message: "<gradient:#ff00cc:#ccff00><bold>[Donation]</bold></gradient> <yellow><bold>{donator_name}</bold></yellow> <white>donated</white> <green><b>Rp{amount_formatted}</b></green> <gray>»</gray> <white>{message}</white>"
+
+
+# you can run commands based on donation amount
+# customize triggers at donationtrigger.yml
+# type: boolean
+# default: true
+command-trigger: true
+
+# the plugins's prefix
+# minimessage support
+# type: string
+# default: &9[flowsense]
+prefix: "<#60B5FF>[flowsense]"
+
+
+# if you toggle this to true, your plugin is able to receive a
+# fake donation through https://ux.appcloud.id/fakedonation
+# see the documentation on how to send a fake donation.
+# type: boolean
+# default: false
+development-mode: false
