@@ -3,19 +3,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>id.sattr</groupId>
     <artifactId>flowsense</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
-
     <name>flowsense</name>
-
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
     <build>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
@@ -43,13 +39,14 @@
                             <relocations>
                                 <relocation>
                                     <pattern>io.github.milkdrinkers.colorparser</pattern>
-                                    <shadedPattern>id.sattr.flowsense.colorparser</shadedPattern>
+                                    <shadedPattern>id.flowsense.flowsense.colorparser</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
         <resources>
             <resource>
@@ -71,14 +68,12 @@
     </repositories>
 
     <dependencies>
-
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
             <version>4.14.0</version>
         </dependency>
 
-        <!-- minimessage support -->
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
@@ -86,16 +81,15 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.milkdrinkers</groupId>
-            <artifactId>colorparser</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
-        <!-- adventure platform buat Bukkit -->
-        <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
             <version>4.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.milkdrinkers</groupId>
+            <artifactId>colorparser</artifactId>
+            <version>3.0.1</version>
         </dependency>
 
         <dependency>
@@ -106,15 +100,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.sparkjava</groupId>
-            <artifactId>spark-core</artifactId>
-            <version>2.9.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <groupId>com.grack</groupId>
+            <artifactId>nanojson</artifactId>
+            <version>1.10</version>
         </dependency>
 
     </dependencies>

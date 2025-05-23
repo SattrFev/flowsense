@@ -1,6 +1,7 @@
-package id.sattr;
+package id.flowsense;
 
-import com.google.gson.JsonObject;
+
+import com.grack.nanojson.JsonObject;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,23 +53,30 @@ public class donationtriggermanager {
         }
     }
 
-    private Map<String, String> buildPlaceholders(JsonObject jsonObject) {
+    private Map<String, String> buildPlaceholders(com.grack.nanojson.JsonObject jsonObject) {
         Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("version", jsonObject.get("version").getAsString());
-        placeholders.put("created_at", jsonObject.get("created_at").getAsString());
-        placeholders.put("id", jsonObject.get("id").getAsString());
-        placeholders.put("type", jsonObject.get("type").getAsString());
-        placeholders.put("amount_raw", String.valueOf(jsonObject.get("amount_raw").getAsInt()));
-        placeholders.put("amount_formatted", formatAmount(jsonObject.get("amount_raw").getAsInt()));
-        placeholders.put("cut", String.valueOf(jsonObject.get("cut").getAsInt()));
-        placeholders.put("cut_formatted", formatAmount(jsonObject.get("cut").getAsInt()));
-        placeholders.put("donator_name", jsonObject.get("donator_name").getAsString());
-        placeholders.put("donator_email", jsonObject.get("donator_email").getAsString());
-        placeholders.put("donator_is_user", String.valueOf(jsonObject.get("donator_is_user").getAsBoolean()));
-        placeholders.put("message", jsonObject.get("message").getAsString());
+
+        placeholders.put("version", (String) jsonObject.get("version"));
+        placeholders.put("created_at", (String) jsonObject.get("created_at"));
+        placeholders.put("id", (String) jsonObject.get("id"));
+        placeholders.put("type", (String) jsonObject.get("type"));
+
+        int amountRaw = ((Number) jsonObject.get("amount_raw")).intValue();
+        int cut = ((Number) jsonObject.get("cut")).intValue();
+
+        placeholders.put("amount_raw", String.valueOf(amountRaw));
+        placeholders.put("amount_formatted", formatAmount(amountRaw));
+        placeholders.put("cut", String.valueOf(cut));
+        placeholders.put("cut_formatted", formatAmount(cut));
+
+        placeholders.put("donator_name", (String) jsonObject.get("donator_name"));
+        placeholders.put("donator_email", (String) jsonObject.get("donator_email"));
+        placeholders.put("donator_is_user", String.valueOf(jsonObject.get("donator_is_user")));
+        placeholders.put("message", (String) jsonObject.get("message"));
 
         return placeholders;
     }
+
 
     private String formatAmount(int amount) {
         return String.format("%,d", amount);

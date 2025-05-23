@@ -1,10 +1,13 @@
-package id.sattr;
+package id.flowsense;
 
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+
+import static id.flowsense.flowsense.prefix;
+import static id.flowsense.flowsense.loggx;
 
 public class donationtrigger {
     private final String key;
@@ -57,7 +60,7 @@ public class donationtrigger {
 
     public void run(Map<String, String> placeholders) {
         if (!isValid) {
-            logger.warning("[saweriaBridge] Skipping command '" + key + "' due to invalid amount condition.");
+            loggx(prefix + " &eSkipping command '" + key + "' due to invalid amount condition.");
             return;
         }
 

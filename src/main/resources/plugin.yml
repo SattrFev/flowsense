@@ -1,14 +1,17 @@
 name: flowsense
 version: '1.0'
-main: id.sattr.flowsense
+main: id.flowsense.flowsense
 api-version: '1.18'
 author: sattr
 description: all-in-one donation gateway to monetize your minecraft server in ease
 website: https://flowsense.noclick.cc
 commands:
   flowsense:
-    usage: /<command> reload
-    permission: flowsense.reload
+    usage: /<command> reload|fakedonate
 permissions:
   flowsense.reload:
+    description: Allows reloading the plugin config and restarting the webhook server
+    default: op
+  flowsense.fakedonate:
+    description: Allows sending a fake donation through command
     default: op

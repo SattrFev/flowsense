@@ -19,7 +19,7 @@
 #  - {donator_is_user}
 #  - {message}
 
-# Example: Play a bell sound for everyone when someone donates exactly 10,000
+# Example: Play a bell sound for weveryone when someone donates exactly 10,000
 sound-trigger:
   amount: "=10000"
   commands: # (don't use "/")
