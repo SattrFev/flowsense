@@ -38,7 +38,7 @@ public class commands implements CommandExecutor, TabCompleter {
             plugin.reloadConfig();
             plugin.commandtriggermanager.clearCommands();
             plugin.commandtriggermanager.loadFromDonationTriggerConfig();
-            plugin.restartWebhookServer(sender);
+            plugin.restartFlowPoll(sender);
             return true;
         }
 

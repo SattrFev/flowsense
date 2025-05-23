@@ -33,14 +33,17 @@ broadcast-message: true
 # you can use these local placeholders:
 #  - {id}
 #  - {created_at}
-#  - {provider}
+#  - {provider_id}
 #  - {provider_name}
 #  - {amount_raw}
-#  - {amount_formatted}
+# - {amount_formatted}       <- Formatted amount using the default locale (e.g., based on server or player region)
+# - {amount_formatted_US}    <- Formatted amount in US style (e.g., 1,234.56)
+# - {amount_formatted_DE}    <- Formatted amount in German style (e.g., 1.234,56)
+
 #  - {donator_name}
-#  - {donator_email}     <- this will be empty if you use trakteer.id
+#  - {donator_email}         <- this will be empty if you use trakteer.id
 #  - {message}
-#  - {unit}              <- this will be empty if your not using trakteer.id
+#  - {unit}                  <- this will be empty if your not using trakteer.id
 #  - {unit_qty}              <- this will be empty if your not using trakteer.id
 
 # type: string

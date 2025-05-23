@@ -2,6 +2,7 @@ package id.flowsense;
 
 
 import com.grack.nanojson.JsonObject;
+import com.grack.nanojson.JsonWriter;
 import io.github.milkdrinkers.colorparser.ColorParser;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
@@ -12,6 +13,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class flowsense extends JavaPlugin {
 
@@ -19,6 +22,7 @@ public class flowsense extends JavaPlugin {
     private static flowsense instance;
     private static FlowAuth flowAuth;
     donationtriggermanager commandtriggermanager;
+    private static boolean polling = false;
 
     public static String prefix, token, clientid, prtoken;
     public static int provider;
@@ -35,42 +39,50 @@ public class flowsense extends JavaPlugin {
         audiences.sender(sender).sendMessage(msg);
     }
 
-    public void handleMessage(JsonObject objx) {
+    public void handleMessage(JsonObject entry) {
         try {
-            String version = (String) objx.get("version");
-            String createdAt = (String) objx.get("created_at");
-            String idx = (String) objx.get("id");
-            String type = (String) objx.get("type");
-            int amountRaw = ((Number) objx.get("amount_raw")).intValue();
-            int cut = ((Number) objx.get("cut")).intValue();
+//            Getting the required value
+            String createdAt = entry.getString("created_at");
+            int idx = entry.getInt("id");
+            int amountRaw = entry.getInt("amount");
+            String donatorName = entry.getString("donator_name");
+            String donatorEmail = entry.getString("donator_email");
+            String messagex = entry.getString("message");
+            String unitx = entry.getString("unit");
+            int unitqty = entry.getInt("unit");
+            String amountFormatted_US = NumberFormat.getNumberInstance(Locale.US).format(amountRaw);
+            String amountFormatted_DE = NumberFormat.getNumberInstance(Locale.GERMAN).format(amountRaw);
 
-            DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-            symbols.setGroupingSeparator('.');
-            symbols.setDecimalSeparator(',');
-            DecimalFormat f = new DecimalFormat("#,###", symbols);
-            String amountFormatted = f.format(amountRaw);
-            String cutFormatted = f.format(cut);
-
-            String donatorName = (String) objx.get("donator_name");
-            String donatorEmail = (String) objx.get("donator_email");
-            String messagex = (String) objx.get("message");
-            boolean isDonatorUser = (boolean) objx.get("donator_is_user");
+//            Making "Provider Name"
+            int providerId = entry.getInt("provider");
+            String providerName = "";
+            switch (providerId) {
+                case 1:
+                    providerName = "Saweria";
+                    break;
+                case 2:
+                    providerName = "Tako";
+                    break;
+                case 3:
+                    providerName = "Trakteer";
+                    break;
+            }
 
             String messageTemplate = getConfig().getString("message", "");
-
             String parsed = messageTemplate
-                    .replace("{version}", version)
+                    .replace("{id}", String.valueOf(idx))
                     .replace("{created_at}", createdAt)
-                    .replace("{id}", idx)
-                    .replace("{type}", type)
+                    .replace("{provider_id}", String.valueOf(providerId))
+                    .replace("{provider_name}", providerName)
                     .replace("{amount_raw}", String.valueOf(amountRaw))
-                    .replace("{amount_formatted}", amountFormatted)
-                    .replace("{cut}", String.valueOf(cut))
-                    .replace("{cut_formatted}", cutFormatted)
+                    .replace("{amount_formatted}", amountFormatted_US)
+                    .replace("{amount_formatted_US}", amountFormatted_US)
+                    .replace("{amount_formatted_DE}", amountFormatted_DE)
                     .replace("{donator_name}", donatorName)
                     .replace("{donator_email}", donatorEmail)
-                    .replace("{donator_is_user}", String.valueOf(isDonatorUser))
-                    .replace("{message}", messagex);
+                    .replace("{message}", messagex)
+                    .replace("{unit}", unitx)
+                    .replace("{unit_qty}", String.valueOf(unitqty));
 
             Component finalMessage = ColorParser.of(parsed).parseLegacy().build();
             audiences.all().sendMessage(finalMessage);
@@ -101,6 +113,30 @@ public class flowsense extends JavaPlugin {
         loggx(prefix + " &aSuccessfully enabled! &f(took " + timeTaken + " ms)");
     }
 
+    private Thread pollingthread = new Thread(() -> {
+        while (polling) {
+            try {
+                boolean updated = flowAuth.update(token, clientid);
+                JsonObject entry = FlowPoll.get(token, clientid);
+                loggx(JsonWriter.string(entry));
+            } catch (IOException e) {
+                loggx(prefix + " &cPolling Error!");
+                e.printStackTrace();
+                break;
+            }
+
+            try {
+                Thread.sleep(333);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    });
+
+    public void restartFlowPoll(CommandSender sender) {
+
+    }
+
     private void setupFlowPoll(Boolean isreload, CommandSender reloader) throws IOException {
         token = getConfig().getString("token", null);
         prtoken = getConfig().getString("webhook-token", null);
@@ -111,25 +147,26 @@ public class flowsense extends JavaPlugin {
         isMessage = getConfig().getBoolean("broadcast-message", true);
         isCommandTrigger = getConfig().getBoolean("command-trigger", true);
 
-        if (prtoken == null && token == null) {
-            loggx(prefix + " &cConfig error: Token and Webhook-Token is missing! &econfigure it in config.yml");
+        if ((prtoken == null || prtoken.isEmpty()) && (token == null || token.isEmpty())) {
+            loggx(prefix + " &cConfig error: Both &e'token' &cand &e'webhook-token' &care missing! &7Please set them in config.yml.");
         } else if (prtoken == null || prtoken.isEmpty()) {
-            loggx(prefix + " &cConfig error: Webhook-Token is missing! &econfigure it in config.yml");
+            loggx(prefix + " &cConfig error: Missing &e'webhook-token'&c in config.yml.");
         } else if (token == null || token.isEmpty()) {
-            loggx(prefix + " &cConfig error: Token is missing! &econfigure it in config.yml");
+            loggx(prefix + " &cConfig error: Missing &e'token'&c in config.yml.");
         } else if (provider < 1 || provider > 3) {
-            loggx(prefix + " &cConfig error: Provider is not valid! &ereconfigure it in config.yml");
+            loggx(prefix + " &cConfig error: &e'provider' &cvalue is invalid! &7Accepted values: 1, 2, or 3.");
         }
+
 
         flowAuth = new FlowAuth();
         clientid = flowAuth.auth(token, provider, prtoken);
 
         if (clientid == null || clientid.isEmpty()) {
-            loggx(  prefix+ " &cAuthentication failed! token is invalid! &ereconfigure it in config.yml");
+            loggx(  prefix+ " &cAuthentication failed! token is invalid! ");
             Bukkit.getPluginManager().disablePlugin(this);
         } else {
             loggx(prefix + " &aAuthentication success! &fwith cliendid &a" + clientid);
-
+            pollingthread.start();
         }
     }
 
@@ -137,6 +174,7 @@ public class flowsense extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        polling = false;
         if (audiences != null) audiences.close();
     }
 

@@ -57,7 +57,7 @@ public class FlowPoll {
             return JsonParser.object().from(jsonString);
 
         } catch (IOException e) {
-            System.err.println("Error during poll: " + e.getMessage());
+//            System.err.println("Error during poll: " + e.getMessage());
             return null;
         } catch (JsonParserException e) {
             throw new RuntimeException(e);
