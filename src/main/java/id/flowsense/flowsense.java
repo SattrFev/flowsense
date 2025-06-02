@@ -16,6 +16,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+
 public class flowsense extends JavaPlugin {
 
     private static BukkitAudiences audiences;
@@ -26,7 +27,7 @@ public class flowsense extends JavaPlugin {
 
     public static String prefix, token, clientid, prtoken;
     public static int provider;
-    public static boolean isCommandTrigger, isMessage, consolelog;
+    public static boolean isCommandTrigger, isMessage;
 
 
     public static void loggx(String s) {
@@ -101,61 +102,58 @@ public class flowsense extends JavaPlugin {
         saveDefaultConfig();
         commandtriggermanager = new donationtriggermanager(this);
         commandtriggermanager.loadFromDonationTriggerConfig();
+        boolean setup = true;
         try {
-            setupFlowPoll(false, null);
+            setup = setupFlowPoll(false, null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
         new commands(this);
         long endTime = System.currentTimeMillis();
         long timeTaken = endTime - startTime;
 
-        loggx(prefix + " &aSuccessfully enabled! &f(took " + timeTaken + " ms)");
+        if (setup) {
+            loggx(prefix + " &aSuccessfully enabled! &f(took " + timeTaken + " ms)");
+        } else {
+            loggx(prefix + " &cPlugin not enabled! &f(took " + timeTaken + " ms)");
+        }
+
     }
 
-    private Thread pollingthread = new Thread(() -> {
-        while (polling) {
-            try {
-                boolean updated = flowAuth.update(token, clientid);
-                JsonObject entry = FlowPoll.get(token, clientid);
-                loggx(JsonWriter.string(entry));
-            } catch (IOException e) {
-                loggx(prefix + " &cPolling Error!");
-                e.printStackTrace();
-                break;
-            }
 
-            try {
-                Thread.sleep(333);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-    });
 
     public void restartFlowPoll(CommandSender sender) {
-
     }
 
-    private void setupFlowPoll(Boolean isreload, CommandSender reloader) throws IOException {
+    private boolean isNullOrEmpty(String s) {
+        return s == null || s.isEmpty();
+    }
+
+    private boolean setupFlowPoll(Boolean isreload, CommandSender reloader) throws IOException {
         token = getConfig().getString("token", null);
         prtoken = getConfig().getString("webhook-token", null);
         provider = getConfig().getInt("provider", 0);
         prefix = getConfig().getString("prefix", "&9[flowsense]");
 
-        consolelog = getConfig().getBoolean("log-donation", false);
         isMessage = getConfig().getBoolean("broadcast-message", true);
         isCommandTrigger = getConfig().getBoolean("command-trigger", true);
 
-        if ((prtoken == null || prtoken.isEmpty()) && (token == null || token.isEmpty())) {
+
+        if (isNullOrEmpty(prtoken) && isNullOrEmpty(token)) {
             loggx(prefix + " &cConfig error: Both &e'token' &cand &e'webhook-token' &care missing! &7Please set them in config.yml.");
-        } else if (prtoken == null || prtoken.isEmpty()) {
+            return false;
+        } else if (isNullOrEmpty(prtoken)) {
             loggx(prefix + " &cConfig error: Missing &e'webhook-token'&c in config.yml.");
-        } else if (token == null || token.isEmpty()) {
+            return false;
+        } else if (isNullOrEmpty(token)) {
             loggx(prefix + " &cConfig error: Missing &e'token'&c in config.yml.");
+            return false;
         } else if (provider < 1 || provider > 3) {
             loggx(prefix + " &cConfig error: &e'provider' &cvalue is invalid! &7Accepted values: 1, 2, or 3.");
+            return false;
         }
+
 
 
         flowAuth = new FlowAuth();
@@ -164,17 +162,47 @@ public class flowsense extends JavaPlugin {
         if (clientid == null || clientid.isEmpty()) {
             loggx(  prefix+ " &cAuthentication failed! token is invalid! ");
             Bukkit.getPluginManager().disablePlugin(this);
+            return false;
         } else {
             loggx(prefix + " &aAuthentication success! &fwith cliendid &a" + clientid);
-            pollingthread.start();
+           pollingthread.start();
+            return true;
         }
     }
+
+    Thread pollingthread = new Thread(() -> {
+//        loggx(prefix + " &eThread Running! &7Token " + token + " | &7Id " + clientid);
+        polling = true;
+        while (polling) {
+            try {
+                boolean updated = FlowAuth.update(token, clientid);
+                JsonObject entry = FlowPoll.get(token, clientid);
+                if (entry != null) {
+                    loggx(JsonWriter.string(entry));
+                }
+            } catch (IOException e) {
+                loggx(prefix + " &cPolling Error!");
+                e.printStackTrace();
+                break;
+            }
+            try {
+                Thread.sleep(33);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    });
 
 
 
     @Override
     public void onDisable() {
         polling = false;
+        try {
+            FlowAuth.exit(token, clientid);
+        } catch (IOException e) {
+            loggx(prefix + " &eError when stopping client!" + e.toString());
+        }
         if (audiences != null) audiences.close();
     }
 

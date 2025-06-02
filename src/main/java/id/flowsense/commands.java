@@ -93,7 +93,6 @@ public class commands implements CommandExecutor, TabCompleter {
             etc.put("amount_to_display", amount);
             obj.put("etc", etc);
             Bukkit.getPluginManager().callEvent(new donationevent(JsonWriter.string(obj)));
-            if (consolelog) loggx(prefix + " &dDonation Recieved!");
             if (isCommandTrigger) {
                 plugin.commandtriggermanager.checkAndRun(amount, obj);
             };

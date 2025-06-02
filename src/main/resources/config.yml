@@ -17,12 +17,6 @@ provider: 1
 # default: ""
 webhook-token: ""
 
-# log "Donation Recieved!" in console when a donation received
-# you dont necessarily need this to be true
-# type: boolean
-# default: false
-log-donation: false
-
 # show donation messages in-game when someone donates
 # type: boolean
 # default: true
