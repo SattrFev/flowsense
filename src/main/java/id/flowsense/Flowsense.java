@@ -11,18 +11,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 
 
-public class flowsense extends JavaPlugin {
+public class Flowsense extends JavaPlugin {
 
     private static BukkitAudiences audiences;
-    private static flowsense instance;
+    private static Flowsense instance;
     private static FlowAuth flowAuth;
-    donationtriggermanager commandtriggermanager;
+    DonationTriggerManager commandtriggermanager;
     private static boolean polling = false;
 
     public static String prefix, token, clientid, prtoken;
@@ -100,7 +98,7 @@ public class flowsense extends JavaPlugin {
         instance = this;
         this.audiences = BukkitAudiences.create(this);
         saveDefaultConfig();
-        commandtriggermanager = new donationtriggermanager(this);
+        commandtriggermanager = new DonationTriggerManager(this);
         commandtriggermanager.loadFromDonationTriggerConfig();
         boolean setup = true;
         try {
@@ -109,7 +107,7 @@ public class flowsense extends JavaPlugin {
             throw new RuntimeException(e);
         }
 
-        new commands(this);
+        new Commands(this);
         long endTime = System.currentTimeMillis();
         long timeTaken = endTime - startTime;
 
@@ -119,11 +117,39 @@ public class flowsense extends JavaPlugin {
             loggx(prefix + " &cPlugin not enabled! &f(took " + timeTaken + " ms)");
         }
 
+
     }
 
-
-
     public void restartFlowPoll(CommandSender sender) {
+        long startTIme = System.currentTimeMillis();
+        instance = this;
+        polling = false;
+        try {
+            FlowAuth.exit(token, clientid);
+        } catch (IOException e) {
+            loggx(prefix + " &eError when stopping client!" + e.toString());
+        }
+        if (audiences != null) audiences.close();
+        saveDefaultConfig();
+        commandtriggermanager = new DonationTriggerManager(this);
+        commandtriggermanager.loadFromDonationTriggerConfig();
+        boolean setup = true;
+        try {
+            setup = setupFlowPoll(false, null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        new Commands(this);
+        long endTime = System.currentTimeMillis();
+        long timeTaken = endTime - startTIme;
+
+        if (setup) {
+            loggx(prefix + " &aPlugin reloaded! &f(took " + timeTaken + " ms)");
+        } else {
+            loggx(prefix + " &cPlugin not reloaded correclty! &f(took " + timeTaken + " ms)");
+        }
+
+
     }
 
     private boolean isNullOrEmpty(String s) {
@@ -157,21 +183,28 @@ public class flowsense extends JavaPlugin {
 
 
         flowAuth = new FlowAuth();
-        clientid = flowAuth.auth(token, provider, prtoken);
-
-        if (clientid == null || clientid.isEmpty()) {
-            loggx(  prefix+ " &cAuthentication failed! token is invalid! ");
-            Bukkit.getPluginManager().disablePlugin(this);
+        String parts[] = flowAuth.auth(token, provider, prtoken).split(":");
+        if (parts[0].equalsIgnoreCase("err")) {
+            switch (parts[1]) {
+                case "401" :
+                    loggx(prefix + " &cToken is invalid!");
+                    return false;
+                case "400" :
+                    loggx(prefix + " &cMissing required parameters!");
+                    return false;
+                case "409" :
+                    loggx(prefix + " &cToken already used by another instance!");
+                    return false;
+            }
             return false;
-        } else {
-            loggx(prefix + " &aAuthentication success! &fwith cliendid &a" + clientid);
-           pollingthread.start();
-            return true;
         }
+        clientid = parts[0];
+        loggx(prefix + " &aAuthentication success! &fwith cliendid &a" + clientid);
+        pollingthread.start();
+        return true;
     }
 
     Thread pollingthread = new Thread(() -> {
-//        loggx(prefix + " &eThread Running! &7Token " + token + " | &7Id " + clientid);
         polling = true;
         while (polling) {
             try {
@@ -195,6 +228,9 @@ public class flowsense extends JavaPlugin {
 
 
 
+
+
+
     @Override
     public void onDisable() {
         polling = false;
@@ -206,7 +242,7 @@ public class flowsense extends JavaPlugin {
         if (audiences != null) audiences.close();
     }
 
-    public static flowsense getInstance() {
+    public static Flowsense getInstance() {
         return instance;
     }
 }

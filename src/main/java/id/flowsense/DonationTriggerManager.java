@@ -8,11 +8,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.*;
 
-public class donationtriggermanager {
-    private final List<donationtrigger> commandtriggers = new ArrayList<>();
+public class DonationTriggerManager {
+    private final List<DonationTrigger> commandtriggers = new ArrayList<>();
     private final JavaPlugin plugin;
 
-    public donationtriggermanager(JavaPlugin plugin) {
+    public DonationTriggerManager(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -32,7 +32,7 @@ public class donationtriggermanager {
             List<String> commands = donationConfig.getStringList(key + ".commands");
 
             if (amount != null && commands != null && !commands.isEmpty()) {
-                donationtrigger commandtrigger = new donationtrigger(key, amount, commands);
+                DonationTrigger commandtrigger = new DonationTrigger(key, amount, commands);
                 commandtriggers.add(commandtrigger);
             }
         }
@@ -46,7 +46,7 @@ public class donationtriggermanager {
         // Map placeholders to replace variables in commands
         Map<String, String> placeholders = buildPlaceholders(jsonObject);
 
-        for (donationtrigger commandtrigger : commandtriggers) {
+        for (DonationTrigger commandtrigger : commandtriggers) {
             if (commandtrigger.shouldTrigger(donationAmount)) {
                 commandtrigger.run(placeholders);
             }
@@ -82,7 +82,7 @@ public class donationtriggermanager {
         return String.format("%,d", amount);
     }
 
-    public List<donationtrigger> getcommandtriggers() {
+    public List<DonationTrigger> getcommandtriggers() {
         return commandtriggers;
     }
 }

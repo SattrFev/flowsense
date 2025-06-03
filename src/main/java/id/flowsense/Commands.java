@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static id.flowsense.flowsense.*;
+import static id.flowsense.Flowsense.*;
 import static java.lang.System.getLogger;
 
-public class commands implements CommandExecutor, TabCompleter {
-    private final flowsense plugin;
-    donationtriggermanager commandtriggermanager;
-    public commands(flowsense plugin) {
+public class Commands implements CommandExecutor, TabCompleter {
+    private final Flowsense plugin;
+    DonationTriggerManager commandtriggermanager;
+    public Commands(Flowsense plugin) {
         this.plugin = plugin;
         plugin.getCommand("flowsense").setExecutor(this);
         plugin.getCommand("flowsense").setTabCompleter(this);
@@ -92,7 +92,7 @@ public class commands implements CommandExecutor, TabCompleter {
             JsonObject etc = new JsonObject();
             etc.put("amount_to_display", amount);
             obj.put("etc", etc);
-            Bukkit.getPluginManager().callEvent(new donationevent(JsonWriter.string(obj)));
+            Bukkit.getPluginManager().callEvent(new DonationEvent(JsonWriter.string(obj)));
             if (isCommandTrigger) {
                 plugin.commandtriggermanager.checkAndRun(amount, obj);
             };

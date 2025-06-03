@@ -5,12 +5,12 @@ import com.grack.nanojson.JsonParser;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class donationevent extends Event {
+public class DonationEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private final String rawDonationData;
     private final JsonObject parsedData;
 
-    public donationevent(String rawDonationData) {
+    public DonationEvent(String rawDonationData) {
         this.rawDonationData = rawDonationData;
         try {
             this.parsedData = JsonParser.object().from(rawDonationData);

@@ -6,10 +6,10 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 
-import static id.flowsense.flowsense.prefix;
-import static id.flowsense.flowsense.loggx;
+import static id.flowsense.Flowsense.prefix;
+import static id.flowsense.Flowsense.loggx;
 
-public class donationtrigger {
+public class DonationTrigger {
     private final String key;
     private final String amountCondition;
     private final List<String> commands;
@@ -18,7 +18,7 @@ public class donationtrigger {
     private int threshold = 0;
     private String operator = "=";
 
-    public donationtrigger(String key, String rawCondition, List<String> commands) {
+    public DonationTrigger(String key, String rawCondition, List<String> commands) {
         this.key = key;
         this.commands = commands;
         String cleaned = rawCondition.replaceAll("\\s+", "");

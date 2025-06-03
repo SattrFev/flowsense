@@ -39,7 +39,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>io.github.milkdrinkers.colorparser</pattern>
-                                    <shadedPattern>id.flowsense.flowsense.colorparser</shadedPattern>
+                                    <shadedPattern>id.flowsense.Flowsense.colorparser</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

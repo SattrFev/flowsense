@@ -1,6 +1,6 @@
 name: flowsense
 version: '1.0'
-main: id.flowsense.flowsense
+main: id.flowsense.Flowsense
 api-version: '1.18'
 author: sattr
 description: all-in-one donation gateway to monetize your minecraft server in ease
